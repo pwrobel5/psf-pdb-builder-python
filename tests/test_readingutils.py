@@ -27,5 +27,5 @@ class TestFileUtils(unittest.TestCase):
         molecule = model.Molecule([na_atom])
 
         molecules = system.molecules
-        self.assertEqual(molecules[0], molecule)
+        self.assertEqual(molecules[0][0], molecule)
         self.assertEqual(system.xyz_file_name, 'li-ec-01.xyz')

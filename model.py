@@ -126,7 +126,7 @@ class System:
     @property
     def atoms_number(self):
         result = 0
-        for molecule in self._molecules:
-            result += molecule.atoms_number
+        for (molecule, molecule_count) in self._molecules:
+            result += molecule.atoms_number * molecule_count
 
         return result

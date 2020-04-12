@@ -40,7 +40,7 @@ class InputReader:
     def read_xyz_data(self):
         molecules = []
 
-        for (xyz_file_name, _) in self._xyz_data:
+        for (xyz_file_name, molecule_count) in self._xyz_data:
             xyz_file = open(xyz_file_name)
 
             atoms_number = int(xyz_file.readline())
@@ -59,7 +59,7 @@ class InputReader:
                     '[WARNING] Difference between declared and read atoms number in file {}, declared: {}, read: {}'.format(
                         xyz_file_name, atoms_number, len(atoms)))
 
-            molecules.append(model.Molecule(atoms))
+            molecules.append((model.Molecule(atoms), molecule_count))
             xyz_file.close()
 
         segment = model.System(molecules, self._packmol_output_name)
