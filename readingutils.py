@@ -56,11 +56,11 @@ class InputReader:
 
             if len(atoms) != atoms_number:
                 print(
-                    '[WARNING] Difference between declared and read atoms number in file %s, declared: %d, read: %d' % (
+                    '[WARNING] Difference between declared and read atoms number in file {}, declared: {}, read: {}'.format(
                         xyz_file_name, atoms_number, len(atoms)))
 
             molecules.append(model.Molecule(atoms))
             xyz_file.close()
 
-        segment = model.Segment(molecules)
+        segment = model.System(molecules, self._packmol_output_name)
         return segment

@@ -105,13 +105,23 @@ class Molecule:
         return result
 
 
-class Segment:
-    def __init__(self, molecules):
+class System:
+    def __init__(self, molecules, xyz_file_name, segment_id="IL"):
         self._molecules = molecules
+        self._xyz_file_name = xyz_file_name
+        self._segment_id = segment_id
 
     @property
     def molecules(self):
         return self._molecules
+
+    @property
+    def xyz_file_name(self):
+        return self._xyz_file_name
+
+    @property
+    def segment_id(self):
+        return self._segment_id
 
     @property
     def atoms_number(self):

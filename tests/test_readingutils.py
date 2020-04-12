@@ -2,7 +2,7 @@ import readingutils
 import unittest
 import model
 
-PACKMOL_FILE_NAME = 'na-f2ec-tfsi-1M-10.inp'
+PACKMOL_FILE_NAME = 'li-ec-01.inp'
 
 
 class TestFileUtils(unittest.TestCase):
@@ -12,9 +12,9 @@ class TestFileUtils(unittest.TestCase):
         reader.parse_packmol_input()
 
         expected_output = [
-            ('na.xyz', 47),
-            ('f1ec.xyz', 461),
-            ('tfsi.xyz', 47)
+            ('li.xyz', 4),
+            ('ec.xyz', 46),
+            ('tfsi.xyz', 4)
         ]
         self.assertEqual(expected_output, reader.xyz_data)
 
@@ -22,9 +22,10 @@ class TestFileUtils(unittest.TestCase):
         reader = readingutils.InputReader(PACKMOL_FILE_NAME)
         reader.parse_packmol_input()
 
-        segment = reader.read_xyz_data()
-        na_atom = model.Atom("Na", model.Coordinates(0.0, 0.0, 0.0))
+        system = reader.read_xyz_data()
+        na_atom = model.Atom("Li", model.Coordinates(0.0, 0.0, 0.0))
         molecule = model.Molecule([na_atom])
 
-        molecules = segment.molecules
+        molecules = system.molecules
         self.assertEqual(molecules[0], molecule)
+        self.assertEqual(system.xyz_file_name, 'li-ec-01.xyz')
