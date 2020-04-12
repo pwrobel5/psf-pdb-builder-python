@@ -62,5 +62,5 @@ class InputReader:
             molecules.append((model.Molecule(atoms), molecule_count))
             xyz_file.close()
 
-        segment = model.System(molecules, self._packmol_output_name)
-        return segment
+        system = model.System(molecules, self._packmol_output_name)
+        return system

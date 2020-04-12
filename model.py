@@ -33,12 +33,16 @@ class Coordinates:
 
 
 class Atom:
-    def __init__(self, symbol, coordinates, charge=0.0, mass=0.0, namd_symbol=""):
+    def __init__(self, symbol, coordinates, charge=0.0, mass=0.0, namd_symbol=None):
         self._symbol = symbol
         self._coordinates = coordinates
         self._charge = charge
         self._mass = mass
-        self._namd_symbol = namd_symbol
+
+        if namd_symbol is None:
+            self._namd_symbol = symbol
+        else:
+            self._namd_symbol = namd_symbol
 
     @property
     def symbol(self):
@@ -86,6 +90,14 @@ class Molecule:
     @property
     def atoms_number(self):
         return len(self._atoms)
+
+    @property
+    def atoms(self):
+        return self._atoms
+
+    @property
+    def residue_name(self):
+        return self._residue_name
 
     def __eq__(self, other):
         if not isinstance(other, Molecule):
