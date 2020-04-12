@@ -22,8 +22,9 @@ class TestFileUtils(unittest.TestCase):
         reader = readingutils.InputReader(PACKMOL_FILE_NAME)
         reader.parse_packmol_input()
 
-        xyz_data = reader.read_xyz_data()
+        segment = reader.read_xyz_data()
         na_atom = model.Atom("Na", model.Coordinates(0.0, 0.0, 0.0))
         molecule = model.Molecule([na_atom])
 
-        self.assertEqual(xyz_data[0], molecule)
+        molecules = segment.molecules
+        self.assertEqual(molecules[0], molecule)

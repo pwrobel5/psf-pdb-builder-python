@@ -83,6 +83,10 @@ class Molecule:
         self._atoms = atoms
         self._residue_name = residue_name
 
+    @property
+    def atoms_number(self):
+        return len(self._atoms)
+
     def __eq__(self, other):
         if not isinstance(other, Molecule):
             return NotImplemented
@@ -97,5 +101,22 @@ class Molecule:
 
         for atom in self._atoms:
             result += str(atom) + '\n'
+
+        return result
+
+
+class Segment:
+    def __init__(self, molecules):
+        self._molecules = molecules
+
+    @property
+    def molecules(self):
+        return self._molecules
+
+    @property
+    def atoms_number(self):
+        result = 0
+        for molecule in self._molecules:
+            result += molecule.atoms_number
 
         return result
