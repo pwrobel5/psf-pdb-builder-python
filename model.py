@@ -28,6 +28,9 @@ class Coordinates:
     def __hash__(self):
         return hash((self._x, self._y, self._z))
 
+    def __str__(self):
+        return str(self._x) + ' ' + str(self._y) + ' ' + str(self._z)
+
 
 class Atom:
     def __init__(self, symbol, coordinates, charge=0.0, mass=0.0, namd_symbol=""):
@@ -70,6 +73,10 @@ class Atom:
     def __hash__(self):
         return hash((self._symbol, self._coordinates, self._charge, self._mass, self._namd_symbol))
 
+    def __str__(self):
+        return self._namd_symbol + '(' + self._symbol + ') ' + str(self._coordinates) + ' charge: ' + str(
+            self._charge) + ', mass: ' + str(self._mass)
+
 
 class Molecule:
     def __init__(self, atoms, residue_name="MOL"):
@@ -84,3 +91,11 @@ class Molecule:
 
     def __hash__(self):
         return hash((self._atoms, self._residue_name))
+
+    def __str__(self):
+        result = 'Molecule: ' + self._residue_name + '\n'
+
+        for atom in self._atoms:
+            result += str(atom) + '\n'
+
+        return result
