@@ -1,0 +1,16 @@
+seed 1030
+tolerance 2.0
+output na-f2ec-tfsi-1M-10.xyz
+filetype xyz
+structure na.xyz
+  number 47
+  inside cube -22.0 -22.0 -22.0 44.0
+end structure
+structure f1ec.xyz
+  number 461
+  inside cube -22.0 -22.0 -22.0 44.0
+end structure
+structure tfsi.xyz
+  number 47
+  inside cube -22.0 -22.0 -22.0 44.0
+end structure
