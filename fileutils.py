@@ -12,7 +12,7 @@ class InputReader:
     def packmol_output_name(self):
         return self._packmol_output_name
 
-    def parse_input(self):
+    def parse_packmol_input(self):
         input_file = open(self._input_file_name, 'r')
 
         for line in input_file:

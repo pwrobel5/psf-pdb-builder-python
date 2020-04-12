@@ -1,3 +1,6 @@
+from collections import Counter
+
+
 class Coordinates:
     def __init__(self, x=0.0, y=0.0, z=0.0):
         self._x = x
@@ -21,6 +24,9 @@ class Coordinates:
             return NotImplemented
 
         return self._x == other._x and self._y == other._y and self._z == other._z
+
+    def __hash__(self):
+        return hash((self._x, self._y, self._z))
 
 
 class Atom:
@@ -60,3 +66,21 @@ class Atom:
                self._charge == other._charge and \
                self._mass == other._mass and \
                self._namd_symbol == other._namd_symbol
+
+    def __hash__(self):
+        return hash((self._symbol, self._coordinates, self._charge, self._mass, self._namd_symbol))
+
+
+class Molecule:
+    def __init__(self, atoms, residue_name):
+        self._atoms = atoms
+        self._residue_name = residue_name
+
+    def __eq__(self, other):
+        if not isinstance(other, Molecule):
+            return NotImplemented
+
+        return Counter(self._atoms) == Counter(other._atoms) and self._residue_name == other._residue_name
+
+    def __hash__(self):
+        return hash((self._atoms, self._residue_name))

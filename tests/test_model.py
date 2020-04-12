@@ -20,3 +20,19 @@ class TestModel(unittest.TestCase):
 
         self.assertEqual(atom1, atom2)
         self.assertNotEqual(atom1, atom3)
+
+    def test_compare_molecules(self):
+        coordinates1 = model.Coordinates()
+        coordinates2 = model.Coordinates(1.0, 0.0, 0.0)
+        coordinates3 = model.Coordinates(0.5, 1.0, 0.0)
+
+        atom1 = model.Atom("H", coordinates1)
+        atom2 = model.Atom("H", coordinates2)
+        atom3 = model.Atom("H", coordinates3)
+
+        molecule1 = model.Molecule([atom1, atom2], "MOL")
+        molecule2 = model.Molecule([atom2, atom1], "MOL")
+        molecule3 = model.Molecule([atom1, atom2, atom3], "MOL")
+
+        self.assertEqual(molecule1, molecule2)
+        self.assertNotEqual(molecule2, molecule3)
