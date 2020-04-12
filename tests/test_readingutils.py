@@ -1,4 +1,4 @@
-import fileutils
+import readingutils
 import unittest
 import model
 
@@ -8,7 +8,7 @@ PACKMOL_FILE_NAME = 'na-f2ec-tfsi-1M-10.inp'
 class TestFileUtils(unittest.TestCase):
 
     def test_input_reader(self):
-        reader = fileutils.InputReader(PACKMOL_FILE_NAME)
+        reader = readingutils.InputReader(PACKMOL_FILE_NAME)
         reader.parse_packmol_input()
 
         expected_output = [
@@ -19,7 +19,7 @@ class TestFileUtils(unittest.TestCase):
         self.assertEqual(expected_output, reader.xyz_data)
 
     def test_xyz_reader(self):
-        reader = fileutils.InputReader(PACKMOL_FILE_NAME)
+        reader = readingutils.InputReader(PACKMOL_FILE_NAME)
         reader.parse_packmol_input()
 
         xyz_data = reader.read_xyz_data()
