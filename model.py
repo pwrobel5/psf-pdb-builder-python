@@ -72,7 +72,7 @@ class Atom:
 
 
 class Molecule:
-    def __init__(self, atoms, residue_name):
+    def __init__(self, atoms, residue_name="MOL"):
         self._atoms = atoms
         self._residue_name = residue_name
 
