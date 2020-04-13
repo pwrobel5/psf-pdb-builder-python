@@ -23,8 +23,8 @@ class TestFileUtils(unittest.TestCase):
         reader.parse_packmol_input()
 
         system = reader.read_xyz_data()
-        na_atom = model.Atom("Li", model.Coordinates(0.0, 0.0, 0.0))
-        molecule = model.Molecule([na_atom])
+        li_atom = model.Atom("Li", model.Coordinates(0.0, 0.0, 0.0), 1.00, 6.997, 'kLi')
+        molecule = model.Molecule([li_atom], 'LI')
 
         molecules = system.molecules
         self.assertEqual(molecules[0][0], molecule)

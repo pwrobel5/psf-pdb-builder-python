@@ -114,6 +114,10 @@ class Molecule:
     def bonds(self):
         return self._bonds
 
+    @bonds.setter
+    def bonds(self, bonds):
+        self._bonds = tuple(bonds)
+
     def __eq__(self, other):
         if not isinstance(other, Molecule):
             return NotImplemented

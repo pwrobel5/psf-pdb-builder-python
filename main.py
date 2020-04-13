@@ -18,11 +18,10 @@ def main():
     psf_file_name = input("Enter psf file name: ")
     psf_saver = savingutils.PSFSaver(psf_file_name, system)
     psf_saver.save_to_file()
-    '''
+
     pdb_file_name = input("Enter pdb file name: ")
     pdb_saver = savingutils.PDBSaver(pdb_file_name, system)
     pdb_saver.save_to_file()
-    '''
 
 
 if __name__ == "__main__":

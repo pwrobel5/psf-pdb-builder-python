@@ -48,7 +48,7 @@ class PSFSaver(FileSaver):
         bonds_number = 0
 
         for (molecule, counter) in self._system.molecules:
-            bonds[molecule] = molecule.determine_bonds()
+            bonds[molecule] = molecule.bonds
             bonds_number += counter * len(bonds[molecule])
 
         self._output_file.write("{:>8} !NBOND: bonds\n".format(bonds_number))
