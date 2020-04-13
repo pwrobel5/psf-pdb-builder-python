@@ -75,6 +75,7 @@ class TestModel(unittest.TestCase):
         atomO2 = model.Atom("O", coordinatesO2)
 
         molecule = model.Molecule([atomH1, atomH2, atomO1, atomO2], "MOL")
-        bonds = molecule.determine_bonds()
-        expected_bonds = [(0, 2), (1, 2)]
+        molecule.determine_bonds(1.50)
+        bonds = molecule.bonds
+        expected_bonds = ((0, 2), (1, 2))
         self.assertEqual(bonds, expected_bonds)

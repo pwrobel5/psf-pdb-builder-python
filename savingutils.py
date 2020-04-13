@@ -19,6 +19,7 @@ class PSFSaver(FileSaver):
     def save_to_file(self):
         self._output_file.write(self.PSF_HEADER)
         self.__save_atoms_section()
+        self.__save_bonds_section()
         self._output_file.close()
         print('PSF file successfully written')
 
@@ -41,6 +42,35 @@ class PSFSaver(FileSaver):
                                                                          atom.mass))
                     atom_number += 1
                 residue_id += 1
+
+    def __save_bonds_section(self):
+        bonds = {}
+        bonds_number = 0
+
+        for (molecule, counter) in self._system.molecules:
+            bonds[molecule] = molecule.determine_bonds()
+            bonds_number += counter * len(bonds[molecule])
+
+        self._output_file.write("{:>8} !NBOND: bonds\n".format(bonds_number))
+        base = 1
+
+        self._output_file.write(" ")
+        items_in_line = 0
+
+        for (molecule, counter) in self._system.molecules:
+            bond_list = bonds[molecule]
+
+            for i in range(0, counter):
+                for (first, second) in bond_list:
+                    self._output_file.write("{:7d} {:7d} ".format(first + base, second + base))
+                    items_in_line = (items_in_line + 1) % 4
+
+                    if items_in_line == 0:
+                        self._output_file.write('\n ')
+                base += molecule.atoms_number
+
+        if items_in_line != 0:
+            self._output_file.write('\n')
 
 
 class PDBSaver(FileSaver):

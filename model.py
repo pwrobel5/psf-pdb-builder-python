@@ -96,6 +96,7 @@ class Molecule:
     def __init__(self, atoms, residue_name="MOL"):
         self._atoms = atoms
         self._residue_name = residue_name
+        self._bonds = None
 
     @property
     def atoms_number(self):
@@ -109,6 +110,10 @@ class Molecule:
     def residue_name(self):
         return self._residue_name
 
+    @property
+    def bonds(self):
+        return self._bonds
+
     def __eq__(self, other):
         if not isinstance(other, Molecule):
             return NotImplemented
@@ -116,7 +121,7 @@ class Molecule:
         return Counter(self._atoms) == Counter(other._atoms) and self._residue_name == other._residue_name
 
     def __hash__(self):
-        return hash((self._atoms, self._residue_name))
+        return hash((tuple(self._atoms), self._residue_name))
 
     def __str__(self):
         result = 'Molecule: ' + self._residue_name + '\n'
@@ -126,7 +131,7 @@ class Molecule:
 
         return result
 
-    def determine_bonds(self, threshold=1.5):
+    def determine_bonds(self, threshold=1.70):
         result = []
 
         for atom in self._atoms[:-1]:
@@ -135,7 +140,7 @@ class Molecule:
                 if atom.coordinates.calculate_distance(neighbour.coordinates) <= threshold:
                     neighbour_index = self._atoms.index(neighbour)
                     result.append((atom_index, neighbour_index))
-        return result
+        self._bonds = tuple(result)
 
 
 class System:
