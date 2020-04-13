@@ -1,5 +1,6 @@
 import model
 import unittest
+import math
 
 
 class TestModel(unittest.TestCase):
@@ -11,6 +12,31 @@ class TestModel(unittest.TestCase):
 
         self.assertEqual(coordinates1, coordinates2)
         self.assertNotEqual(coordinates1, coordinates3)
+
+    def test_norm(self):
+        coordinates1 = model.Coordinates(1.0, 0.0, 0.0)
+        coordinates2 = model.Coordinates(3.0, 4.0, 0.0)
+        coordinates3 = model.Coordinates(-1.0, 0.0, 1.0)
+
+        self.assertEqual(1.0, coordinates1.norm())
+        self.assertEqual(5.0, coordinates2.norm())
+        self.assertEqual(math.sqrt(2.0), coordinates3.norm())
+
+    def test_distance(self):
+        coordinates1 = model.Coordinates(1.0, 0.0, 0.0)
+        coordinates2 = model.Coordinates(1.0, 0.0, 0.0)
+        distance12 = coordinates1.calculate_distance(coordinates2)
+
+        self.assertEqual(0.0, distance12)
+
+        coordinates3 = model.Coordinates(4.0, 4.0, 0.0)
+        distance13 = coordinates1.calculate_distance(coordinates3)
+        self.assertEqual(5.0, distance13)
+
+        coordinates4 = model.Coordinates(-3.0, 0.0, 4.0)
+        distance14 = coordinates1.calculate_distance(coordinates4)
+        distance43 = coordinates4.calculate_distance(coordinates3)
+        self.assertGreaterEqual(distance14 + distance43, distance13)
 
     def test_compare_atoms(self):
         coordinates = model.Coordinates(12.03, 11.01, 10.02)
@@ -36,3 +62,19 @@ class TestModel(unittest.TestCase):
 
         self.assertEqual(molecule1, molecule2)
         self.assertNotEqual(molecule2, molecule3)
+
+    def test_determine_bonds(self):
+        coordinatesH1 = model.Coordinates(0.0, 0.0, 0.95)
+        coordinatesH2 = model.Coordinates(0.89567, 0.00, -0.316663)
+        coordinatesO1 = model.Coordinates(0.0, 0.0, 0.0)
+        coordinatesO2 = model.Coordinates(4.0, 0.0, 0.0)
+
+        atomH1 = model.Atom("H", coordinatesH1)
+        atomH2 = model.Atom("H", coordinatesH2)
+        atomO1 = model.Atom("O", coordinatesO1)
+        atomO2 = model.Atom("O", coordinatesO2)
+
+        molecule = model.Molecule([atomH1, atomH2, atomO1, atomO2], "MOL")
+        bonds = molecule.determine_bonds()
+        expected_bonds = [(0, 2), (1, 2)]
+        self.assertEqual(bonds, expected_bonds)

@@ -1,4 +1,5 @@
 from collections import Counter
+from math import sqrt
 
 
 class Coordinates:
@@ -18,6 +19,15 @@ class Coordinates:
     @property
     def z(self):
         return self._z
+
+    def norm(self):
+        return sqrt(self._x ** 2 + self._y ** 2 + self._z ** 2)
+
+    def calculate_distance(self, other):
+        distance = Coordinates(self.x - other.x,
+                               self.y - other.y,
+                               self.z - other.z)
+        return distance.norm()
 
     def __eq__(self, other):
         if not isinstance(other, Coordinates):
@@ -114,6 +124,17 @@ class Molecule:
         for atom in self._atoms:
             result += str(atom) + '\n'
 
+        return result
+
+    def determine_bonds(self, threshold=1.5):
+        result = []
+
+        for atom in self._atoms[:-1]:
+            atom_index = self._atoms.index(atom)
+            for neighbour in self._atoms[atom_index + 1:]:
+                if atom.coordinates.calculate_distance(neighbour.coordinates) <= threshold:
+                    neighbour_index = self._atoms.index(neighbour)
+                    result.append((atom_index, neighbour_index))
         return result
 
 
