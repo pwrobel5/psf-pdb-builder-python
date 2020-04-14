@@ -20,6 +20,7 @@ class PSFSaver(FileSaver):
         self._output_file.write(self.PSF_HEADER)
         self.__save_atoms_section()
         self.__save_bonds_section()
+        self.__save_angles_section()
         self._output_file.close()
         print('PSF file successfully written')
 
@@ -64,6 +65,35 @@ class PSFSaver(FileSaver):
                 for (first, second) in bond_list:
                     self._output_file.write("{:7d} {:7d} ".format(first + base, second + base))
                     items_in_line = (items_in_line + 1) % 4
+
+                    if items_in_line == 0:
+                        self._output_file.write('\n ')
+                base += molecule.atoms_number
+
+        if items_in_line != 0:
+            self._output_file.write('\n')
+
+    def __save_angles_section(self):
+        angles = {}
+        angles_number = 0
+
+        for (molecule, counter) in self._system.molecules:
+            angles[molecule] = molecule.angles
+            angles_number += counter * len(angles[molecule])
+
+        self._output_file.write("{:>8} !NTHETA: angles\n".format(angles_number))
+        base = 1
+
+        self._output_file.write(" ")
+        items_in_line = 0
+
+        for (molecule, counter) in self._system.molecules:
+            angle_list = angles[molecule]
+
+            for i in range(0, counter):
+                for (first, middle, last) in angle_list:
+                    self._output_file.write("{:7d} {:7d} {:7d} ".format(first + base, middle + base, last + base))
+                    items_in_line = (items_in_line + 1) % 3
 
                     if items_in_line == 0:
                         self._output_file.write('\n ')

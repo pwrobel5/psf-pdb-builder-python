@@ -97,6 +97,7 @@ class Molecule:
         self._atoms = atoms
         self._residue_name = residue_name
         self._bonds = None
+        self._angles = None
 
     @property
     def atoms_number(self):
@@ -117,6 +118,10 @@ class Molecule:
     @bonds.setter
     def bonds(self, bonds):
         self._bonds = tuple(bonds)
+
+    @property
+    def angles(self):
+        return self._angles
 
     def __eq__(self, other):
         if not isinstance(other, Molecule):
@@ -145,6 +150,22 @@ class Molecule:
                     neighbour_index = self._atoms.index(neighbour)
                     result.append((atom_index, neighbour_index))
         self._bonds = tuple(result)
+
+    def determine_angles(self):
+        if self.bonds is None:
+            return
+
+        result = []
+        for i in range(0, self.atoms_number):
+            filtered_bonds = list(filter(lambda x: i in x, self._bonds))
+            left_sides = list(filter(lambda x: x[1] == i, filtered_bonds))
+            right_sides = list(filter(lambda x: x[0] == i, filtered_bonds))
+
+            for left in left_sides:
+                for right in right_sides:
+                    result.append(left + (right[1],))
+
+        self._angles = tuple(result)
 
 
 class System:

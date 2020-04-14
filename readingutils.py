@@ -80,6 +80,8 @@ class InputReader:
             else:
                 molecule.determine_bonds()
 
+            molecule.determine_angles()
+
             molecules.append((molecule, molecule_count))
             xyz_file.close()
             dat_file.close()
