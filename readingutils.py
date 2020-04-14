@@ -81,6 +81,7 @@ class InputReader:
                 molecule.determine_bonds()
 
             molecule.determine_angles()
+            molecule.determine_dihedrals()
 
             molecules.append((molecule, molecule_count))
             xyz_file.close()

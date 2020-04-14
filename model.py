@@ -98,6 +98,7 @@ class Molecule:
         self._residue_name = residue_name
         self._bonds = None
         self._angles = None
+        self._dihedrals = None
 
     @property
     def atoms_number(self):
@@ -122,6 +123,10 @@ class Molecule:
     @property
     def angles(self):
         return self._angles
+
+    @property
+    def dihedrals(self):
+        return self._dihedrals
 
     def __eq__(self, other):
         if not isinstance(other, Molecule):
@@ -157,15 +162,30 @@ class Molecule:
 
         result = []
         for i in range(0, self.atoms_number):
-            filtered_bonds = list(filter(lambda x: i in x, self._bonds))
-            left_sides = list(filter(lambda x: x[1] == i, filtered_bonds))
-            right_sides = list(filter(lambda x: x[0] == i, filtered_bonds))
+            filtered_bonds = filter(lambda x: i in x, self._bonds)
+            left_sides = filter(lambda x: x[1] == i, filtered_bonds)
+            right_sides = filter(lambda x: x[0] == i, filtered_bonds)
 
             for left in left_sides:
                 for right in right_sides:
                     result.append(left + (right[1],))
 
         self._angles = tuple(result)
+
+    def determine_dihedrals(self):
+        if self.angles is None:
+            return
+
+        result = []
+        for i in range(0, self.atoms_number):
+            left_sides = list(filter(lambda x: x[2] == i, self._angles))
+            right_sides = list(filter(lambda x: x[0] == i, self._bonds))
+
+            for left in left_sides:
+                for right in right_sides:
+                    result.append(left + (right[1],))
+
+        self._dihedrals = tuple(result)
 
 
 class System:

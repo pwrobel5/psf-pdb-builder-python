@@ -21,6 +21,7 @@ class PSFSaver(FileSaver):
         self.__save_atoms_section()
         self.__save_bonds_section()
         self.__save_angles_section()
+        self.__save_dihedrals_section()
         self._output_file.close()
         print('PSF file successfully written')
 
@@ -94,6 +95,36 @@ class PSFSaver(FileSaver):
                 for (first, middle, last) in angle_list:
                     self._output_file.write("{:7d} {:7d} {:7d} ".format(first + base, middle + base, last + base))
                     items_in_line = (items_in_line + 1) % 3
+
+                    if items_in_line == 0:
+                        self._output_file.write('\n ')
+                base += molecule.atoms_number
+
+        if items_in_line != 0:
+            self._output_file.write('\n')
+
+    def __save_dihedrals_section(self):
+        dihedrals = {}
+        dihedrals_number = 0
+
+        for (molecule, counter) in self._system.molecules:
+            dihedrals[molecule] = molecule.dihedrals
+            dihedrals_number += counter * len(dihedrals[molecule])
+
+        self._output_file.write("{:>8} !NPHI: dihedrals\n".format(dihedrals_number))
+        base = 1
+
+        self._output_file.write(" ")
+        items_in_line = 0
+
+        for (molecule, counter) in self._system.molecules:
+            dihedral_list = dihedrals[molecule]
+
+            for i in range(0, counter):
+                for (first, second, third, fourth) in dihedral_list:
+                    self._output_file.write(
+                        "{:7d} {:7d} {:7d} {:7d} ".format(first + base, second + base, third + base, fourth + base))
+                    items_in_line = (items_in_line + 1) % 2
 
                     if items_in_line == 0:
                         self._output_file.write('\n ')
