@@ -1,3 +1,5 @@
+import os
+
 import model
 
 COORDINATE_LINE_COLUMNS = 4
@@ -24,9 +26,9 @@ class InputReader:
             line = line.split()
 
             if line[0] == 'output':
-                self._packmol_output_name = line[1]
+                self._packmol_output_name = os.path.dirname(input_file.name) + '/' + line[1]
             elif line[0] == 'structure':
-                xyz_name = line[1]
+                xyz_name = os.path.dirname(input_file.name) + '/' + line[1]
                 line = next(input_file).split()
 
                 while line[0] != 'end':
