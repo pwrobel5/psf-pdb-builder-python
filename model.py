@@ -66,13 +66,25 @@ class Atom:
     def charge(self):
         return self._charge
 
+    @charge.setter
+    def charge(self, charge):
+        self._charge = charge
+
     @property
     def mass(self):
         return self._mass
 
+    @mass.setter
+    def mass(self, mass):
+        self._mass = mass
+
     @property
     def namd_symbol(self):
         return self._namd_symbol
+
+    @namd_symbol.setter
+    def namd_symbol(self, namd_symbol):
+        self._namd_symbol = namd_symbol
 
     def __eq__(self, other):
         if not isinstance(other, Atom):
@@ -111,6 +123,10 @@ class Molecule:
     @property
     def residue_name(self):
         return self._residue_name
+
+    @residue_name.setter
+    def residue_name(self, residue_name):
+        self._residue_name = residue_name
 
     @property
     def bonds(self):

@@ -6,10 +6,11 @@ COORDINATE_LINE_COLUMNS = 4
 
 
 class InputReader:
-    def __init__(self, input_file_name):
+    def __init__(self, input_file_name, tinker_format=False):
         self._input_file_name = input_file_name
         self._xyz_data = []
         self._packmol_output_name = None
+        self._tinker_format = tinker_format
 
     @property
     def xyz_data(self):
@@ -44,9 +45,7 @@ class InputReader:
 
         for (xyz_file_name, molecule_count) in self._xyz_data:
             xyz_file = open(xyz_file_name, 'r')
-            dat_file = open(xyz_file_name.replace('.xyz', '.dat'), 'r')
 
-            residue_name = dat_file.readline().replace('\n', '')
             atoms_number = int(xyz_file.readline())
             xyz_file.readline()  # omit commentary line in XYZ file
             atoms = []
@@ -57,19 +56,36 @@ class InputReader:
                     atom_symbol = xyz_line[0]
                     atom_coordinates = model.Coordinates(float(xyz_line[1]), float(xyz_line[2]), float(xyz_line[3]))
 
-                    dat_line = dat_file.readline().split()
-                    namd_symbol = dat_line[0]
-                    charge = float(dat_line[1])
-                    mass = float(dat_line[2])
-
-                    atoms.append(model.Atom(atom_symbol, atom_coordinates, charge, mass, namd_symbol))
+                    atoms.append(model.Atom(atom_symbol, atom_coordinates))
 
             if len(atoms) != atoms_number:
                 print(
                     '[WARNING] Difference between declared and read atoms number in file {}, declared: {}, read: {}'.format(
                         xyz_file_name, atoms_number, len(atoms)))
 
-            molecule = model.Molecule(atoms, residue_name)
+            molecule = model.Molecule(atoms)
+            self.__read_dat_data(xyz_file_name.replace('.xyz', '.dat'), molecule)
+
+            molecule.determine_angles()
+            molecule.determine_dihedrals()
+
+            molecules.append((molecule, molecule_count))
+            xyz_file.close()
+
+        system = model.System(molecules, self._packmol_output_name)
+        return system
+
+    def __read_dat_data(self, dat_file_name, molecule):
+        dat_file = open(dat_file_name, 'r')
+        molecule.residue_name = dat_file.readline().replace('\n', '')
+
+        for atom in molecule.atoms:
+            dat_line = dat_file.readline().split()
+            atom.namd_symbol = dat_line[0]
+            atom.charge = float(dat_line[1])
+            atom.mass = float(dat_line[2])
+
+        if not self._tinker_format:
             if 'BONDS' in dat_file.readline():
                 bonds = []
                 dat_line = dat_file.readline().split()
@@ -82,12 +98,4 @@ class InputReader:
             else:
                 molecule.determine_bonds()
 
-            molecule.determine_angles()
-            molecule.determine_dihedrals()
-
-            molecules.append((molecule, molecule_count))
-            xyz_file.close()
-            dat_file.close()
-
-        system = model.System(molecules, self._packmol_output_name)
-        return system
+        dat_file.close()

@@ -15,7 +15,7 @@ def main():
     args = parser.parse_args()
     input_file_name = args.Input
 
-    reader = readingutils.InputReader(input_file_name)
+    reader = readingutils.InputReader(input_file_name, args.tinker)
     reader.parse_packmol_input()
     system = reader.read_xyz_data()
 
