@@ -1,4 +1,5 @@
 from collections import Counter
+from functools import reduce
 from math import sqrt
 
 
@@ -43,11 +44,14 @@ class Coordinates:
 
 
 class Atom:
+    DRUDE_CHARGE_FACTOR = -0.0548768646057431
+
     def __init__(self, symbol, coordinates, charge=0.0, mass=0.0, namd_symbol=None):
         self._symbol = symbol
         self._coordinates = coordinates
         self._charge = charge
         self._mass = mass
+        self._drude_atom = None
 
         if namd_symbol is None:
             self._namd_symbol = symbol
@@ -86,6 +90,14 @@ class Atom:
     def namd_symbol(self, namd_symbol):
         self._namd_symbol = namd_symbol
 
+    @property
+    def drude_atom(self):
+        return self._drude_atom
+
+    @drude_atom.setter
+    def drude_atom(self, drude_atom):
+        self._drude_atom = drude_atom
+
     def __eq__(self, other):
         if not isinstance(other, Atom):
             return NotImplemented
@@ -95,6 +107,15 @@ class Atom:
                self._charge == other._charge and \
                self._mass == other._mass and \
                self._namd_symbol == other._namd_symbol
+
+    def create_drude_atom(self, polarizability, bond_const=1000, mass=0.4):
+        drude_namd_symbol = "D" + self._namd_symbol[:2]
+        drude_charge = self.DRUDE_CHARGE_FACTOR * sqrt(polarizability * bond_const)
+        drude_atom = Atom(self._symbol, self._coordinates, drude_charge, mass, drude_namd_symbol)
+
+        self._mass -= mass
+        self._charge -= drude_charge
+        self._drude_atom = drude_atom
 
     def __hash__(self):
         return hash((self._symbol, self._coordinates, self._charge, self._mass, self._namd_symbol))
@@ -109,12 +130,18 @@ class Molecule:
         self._atoms = atoms
         self._residue_name = residue_name
         self._bonds = None
+        self._drude_bonds = None
         self._angles = None
         self._dihedrals = None
+        self._shifts = {i: 0 for i in range(0, self.atoms_number)}
 
     @property
     def atoms_number(self):
         return len(self._atoms)
+
+    @property
+    def atoms_number_with_drude(self):
+        return reduce(lambda a, b: a + (1 if b.drude_atom is None else 2), self._atoms, 0)
 
     @property
     def atoms(self):
@@ -137,12 +164,20 @@ class Molecule:
         self._bonds = tuple(bonds)
 
     @property
+    def drude_bonds(self):
+        return self._drude_bonds
+
+    @drude_bonds.setter
+    def drude_bonds(self, drude_bonds):
+        self._drude_bonds = tuple(drude_bonds)
+
+    @property
     def angles(self):
         return self._angles
 
     @angles.setter
     def angles(self, angles):
-        self._angles = angles
+        self._angles = tuple(angles)
 
     @property
     def dihedrals(self):
@@ -150,7 +185,20 @@ class Molecule:
 
     @dihedrals.setter
     def dihedrals(self, dihedrals):
-        self._dihedrals = dihedrals
+        self._dihedrals = tuple(dihedrals)
+
+    @property
+    def shifts(self):
+        return self._shifts
+
+    def add_drude_atom(self, atom, polarizability, drude_bonds_list):
+        atom.create_drude_atom(polarizability)
+        index = self._atoms.index(atom)
+        shifted_index = index + self.shifts[index]
+        drude_bonds_list.append((shifted_index, shifted_index + 1))
+
+        for i in range(index + 1, self.atoms_number):
+            self._shifts[i] += 1
 
     def __eq__(self, other):
         if not isinstance(other, Molecule):
@@ -176,7 +224,9 @@ class Molecule:
             atom_index = self._atoms.index(atom)
             for neighbour in self._atoms[atom_index + 1:]:
                 if atom.coordinates.calculate_distance(neighbour.coordinates) <= threshold:
+                    atom_index += self._shifts[atom_index]
                     neighbour_index = self._atoms.index(neighbour)
+                    neighbour_index += self._shifts[neighbour_index]
                     result.append((atom_index, neighbour_index))
         self._bonds = tuple(result)
 
@@ -235,5 +285,13 @@ class System:
         result = 0
         for (molecule, molecule_count) in self._molecules:
             result += molecule.atoms_number * molecule_count
+
+        return result
+
+    @property
+    def atoms_number_with_drude(self):
+        result = 0
+        for (molecule, molecule_count) in self._molecules:
+            result += molecule.atoms_number_with_drude * molecule_count
 
         return result

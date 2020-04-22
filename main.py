@@ -10,11 +10,12 @@ def main():
     parser.add_argument("-psf", type=str, help="Output PSF file name")
     parser.add_argument("-pdb", type=str, help="Output PDB file name")
     parser.add_argument("-t", "--tinker", action="store_true", help="Read .xyz in Tinker analyse format")
+    parser.add_argument("-d", "--drude", action="store_true", help="Create output for polarizable force field")
 
     args = parser.parse_args()
     input_file_name = args.Input
 
-    reader = readingutils.InputReader(input_file_name, args.tinker)
+    reader = readingutils.InputReader(input_file_name, args.tinker, args.drude)
     reader.parse_packmol_input()
     system = reader.read_xyz_data()
 

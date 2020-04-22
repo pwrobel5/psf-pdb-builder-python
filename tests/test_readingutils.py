@@ -2,8 +2,9 @@ import unittest
 
 from utils import model, readingutils
 
-PACKMOL_FILE_NAME = 'li-ec/li-ec-01.inp'
-PACKMOL_TINKER_FILE_NAME = 'fsi-tinker/fsi.inp'
+PACKMOL_FILE_NAME = "li-ec/li-ec-01.inp"
+PACKMOL_TINKER_FILE_NAME = "fsi-tinker/fsi.inp"
+PACKMOL_DRUDE_FILE_NAME = "fsi-tinker-drude/fsi.inp"
 
 
 class TestFileUtils(unittest.TestCase):
@@ -13,9 +14,9 @@ class TestFileUtils(unittest.TestCase):
         reader.parse_packmol_input()
 
         expected_output = [
-            ('li-ec/li.xyz', 4),
-            ('li-ec/ec.xyz', 46),
-            ('li-ec/tfsi.xyz', 4)
+            ("li-ec/li.xyz", 4),
+            ("li-ec/ec.xyz", 46),
+            ("li-ec/tfsi.xyz", 4)
         ]
         self.assertEqual(expected_output, reader.xyz_data)
 
@@ -54,3 +55,26 @@ class TestFileUtils(unittest.TestCase):
         dihedrals = molecule.dihedrals
         self.assertIn((3, 0, 4, 5), dihedrals)
         self.assertIn((1, 0, 4, 5), dihedrals)
+
+    def test_xyz_reader_drude(self):
+        reader = readingutils.InputReader(PACKMOL_DRUDE_FILE_NAME, tinker_format=True, include_drude=True)
+        reader.parse_packmol_input()
+
+        system = reader.read_xyz_data()
+        molecule = system.molecules[0][0]
+        atoms = molecule.atoms
+        bonds = molecule.bonds
+        drude_bonds = molecule.drude_bonds
+        angles = molecule.angles
+        dihedrals = molecule.dihedrals
+
+        self.assertTrue(atoms[0].drude_atom is not None)
+
+        self.assertIn((0, 1), drude_bonds)
+        self.assertIn((0, 8), bonds)
+
+        self.assertIn((4, 0, 6), angles)
+        self.assertIn((8, 9, 11), angles)
+
+        self.assertIn((4, 0, 8, 9), dihedrals)
+        self.assertIn((0, 8, 9, 13), dihedrals)

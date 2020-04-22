@@ -6,16 +6,18 @@ from utils import model
 class InputReader:
     COORDINATE_LINE_COLUMNS = 4
     COORDINATE_LINE_COLUMNS_TINKER = 6
+    DRUDE_LINE_COLUMNS = 5
     BOND_SECTION_BEGINNING = "Bond Stretching Parameters"
     ANGLE_SECTION_BEGINNING = "Angle Bending Parameters"
     DIHEDRAL_SECTION_BEGINNING = "Torsional Angle Parameters"
     CONN_LINES_TO_OMIT = 3
 
-    def __init__(self, input_file_name, tinker_format=False):
+    def __init__(self, input_file_name, tinker_format=False, include_drude=False):
         self._input_file_name = input_file_name
         self._xyz_data = []
         self._packmol_output_name = None
         self._tinker_format = tinker_format
+        self._include_drude = include_drude
 
     @property
     def xyz_data(self):
@@ -66,7 +68,7 @@ class InputReader:
 
             for xyz_line in xyz_file:
                 xyz_line = xyz_line.split()
-                if len(xyz_line) == self.COORDINATE_LINE_COLUMNS:
+                if len(xyz_line) >= self.COORDINATE_LINE_COLUMNS:
                     atom_symbol = xyz_line[0]
                     atom_coordinates = model.Coordinates(float(xyz_line[1]), float(xyz_line[2]), float(xyz_line[3]))
 
@@ -125,6 +127,7 @@ class InputReader:
     def __read_dat_data(self, dat_file_name, molecule):
         dat_file = open(dat_file_name, 'r')
         molecule.residue_name = dat_file.readline().replace('\n', '')
+        drude_bonds_list = []
 
         for atom in molecule.atoms:
             dat_line = dat_file.readline().split()
@@ -132,12 +135,18 @@ class InputReader:
             atom.charge = float(dat_line[1])
             atom.mass = float(dat_line[2])
 
+            if self._include_drude and len(dat_line) >= self.DRUDE_LINE_COLUMNS:
+                molecule.add_drude_atom(atom, float(dat_line[4]), drude_bonds_list)
+
+        molecule.drude_bonds = drude_bonds_list
+
         if not self._tinker_format:
             if 'BONDS' in dat_file.readline():
+                shifts = molecule.shifts
                 bonds = []
                 dat_line = dat_file.readline().split()
                 while 'END' not in dat_line:
-                    bond = (int(dat_line[0]), int(dat_line[1]))
+                    bond = (self.shift(dat_line[0], shifts), self.shift(dat_line[1], shifts))
                     bonds.append(bond)
                     dat_line = dat_file.readline().split()
 
@@ -172,11 +181,12 @@ class InputReader:
 
     @staticmethod
     def __read_bond_conn_data(conn_file, molecule):
+        shifts = molecule.shifts
         bonds = []
         line = conn_file.readline().strip()
         while line != "":
             line = line.split()
-            bond = (int(line[1]) - 1, int(line[2]) - 1)
+            bond = (InputReader.shift(line[1], shifts), InputReader.shift(line[2], shifts))
             bonds.append(bond)
             line = conn_file.readline().strip()
 
@@ -184,11 +194,16 @@ class InputReader:
 
     @staticmethod
     def __read_angles_conn_data(conn_file, molecule):
+        shifts = molecule.shifts
         angles = []
         line = conn_file.readline().strip()
         while line != "":
             line = line.split()
-            angle = (int(line[1]) - 1, int(line[2]) - 1, int(line[3]) - 1)
+            angle = (
+                InputReader.shift(line[1], shifts),
+                InputReader.shift(line[2], shifts),
+                InputReader.shift(line[3], shifts)
+            )
             angles.append(angle)
             line = conn_file.readline().strip()
 
@@ -196,12 +211,24 @@ class InputReader:
 
     @staticmethod
     def __read_dihedrals_conn_data(conn_file, molecule):
+        shifts = molecule.shifts
         dihedrals = []
         line = conn_file.readline().strip()
         while line != "":
             line = line.split()
-            dihedral = (int(line[1]) - 1, int(line[2]) - 1, int(line[3]) - 1, int(line[4]) - 1)
+            dihedral = (
+                InputReader.shift(line[1], shifts),
+                InputReader.shift(line[2], shifts),
+                InputReader.shift(line[3], shifts),
+                InputReader.shift(line[4], shifts)
+            )
             dihedrals.append(dihedral)
             line = conn_file.readline().strip()
 
         molecule.dihedrals = dihedrals
+
+    @staticmethod
+    def shift(string_value, shifts):
+        result = int(string_value) - 1
+        result += shifts[result]
+        return result

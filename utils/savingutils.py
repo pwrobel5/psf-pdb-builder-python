@@ -28,7 +28,7 @@ class PSFSaver(FileSaver):
 
     def __save_atoms_section(self):
         atom_number = 1
-        self._output_file.write("{:>8} !NATOM\n".format(self._system.atoms_number))
+        self._output_file.write("{:>8} !NATOM\n".format(self._system.atoms_number_with_drude))
 
         for (molecule, counter) in self._system.molecules:
             residue_id = 1
@@ -43,6 +43,19 @@ class PSFSaver(FileSaver):
                                                                          atom.namd_symbol,
                                                                          atom.charge,
                                                                          atom.mass))
+
+                    drude_atom = atom.drude_atom
+                    if drude_atom is not None:
+                        atom_number += 1
+                        self._output_file.write(self.ATOM_LINE_FORMAT.format(atom_number,
+                                                                             self._system.segment_id,
+                                                                             residue_id,
+                                                                             molecule.residue_name,
+                                                                             drude_atom.symbol,
+                                                                             drude_atom.namd_symbol,
+                                                                             drude_atom.charge,
+                                                                             drude_atom.mass))
+
                     atom_number += 1
                 residue_id += 1
 
@@ -51,7 +64,7 @@ class PSFSaver(FileSaver):
         bonds_number = 0
 
         for (molecule, counter) in self._system.molecules:
-            bonds[molecule] = molecule.bonds
+            bonds[molecule] = molecule.bonds + molecule.drude_bonds
             bonds_number += counter * len(bonds[molecule])
 
         self._output_file.write("{:>8} !NBOND: bonds\n".format(bonds_number))
@@ -70,7 +83,7 @@ class PSFSaver(FileSaver):
 
                     if items_in_line == 0:
                         self._output_file.write('\n ')
-                base += molecule.atoms_number
+                base += molecule.atoms_number_with_drude
 
         if items_in_line != 0:
             self._output_file.write('\n')
@@ -99,7 +112,7 @@ class PSFSaver(FileSaver):
 
                     if items_in_line == 0:
                         self._output_file.write('\n ')
-                base += molecule.atoms_number
+                base += molecule.atoms_number_with_drude
 
         if items_in_line != 0:
             self._output_file.write('\n')
@@ -129,7 +142,7 @@ class PSFSaver(FileSaver):
 
                     if items_in_line == 0:
                         self._output_file.write('\n ')
-                base += molecule.atoms_number
+                base += molecule.atoms_number_with_drude
 
         if items_in_line != 0:
             self._output_file.write('\n')
@@ -182,6 +195,21 @@ class PDBSaver(FileSaver):
                                                                     temperature_factor,
                                                                     self._system.segment_id,
                                                                     atom_number))
+
+                    drude_atom = atom.drude_atom
+                    if drude_atom is not None:
+                        atom_number += 1
+                        self._output_file.write(self.LINE_FORMAT.format(atom_number,
+                                                                        drude_atom.namd_symbol,
+                                                                        molecule.residue_name,
+                                                                        residue_id,
+                                                                        coordinates.x,
+                                                                        coordinates.y,
+                                                                        coordinates.z,
+                                                                        occupancy,
+                                                                        temperature_factor,
+                                                                        self._system.segment_id,
+                                                                        atom_number))
 
                     atom_number += 1
                 residue_id += 1

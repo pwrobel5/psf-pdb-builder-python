@@ -1,0 +1,5 @@
+output fsi-res.xyz
+structure fsi.xyz
+  number 1
+  inside cube -22.0 -22.0 -22.0 44.0
+end structure
