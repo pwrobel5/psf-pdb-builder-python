@@ -1,8 +1,9 @@
-import readingutils
 import unittest
-import model
 
-PACKMOL_FILE_NAME = 'li-ec-01.inp'
+from utils import model, readingutils
+
+PACKMOL_FILE_NAME = 'li-ec/li-ec-01.inp'
+PACKMOL_TINKER_FILE_NAME = 'fsi-tinker/fsi.inp'
 
 
 class TestFileUtils(unittest.TestCase):
@@ -12,20 +13,44 @@ class TestFileUtils(unittest.TestCase):
         reader.parse_packmol_input()
 
         expected_output = [
-            ('li.xyz', 4),
-            ('ec.xyz', 46),
-            ('tfsi.xyz', 4)
+            ('li-ec/li.xyz', 4),
+            ('li-ec/ec.xyz', 46),
+            ('li-ec/tfsi.xyz', 4)
         ]
         self.assertEqual(expected_output, reader.xyz_data)
 
-    def test_xyz_reader(self):
+    def test_xyz_default_reader(self):
         reader = readingutils.InputReader(PACKMOL_FILE_NAME)
         reader.parse_packmol_input()
 
         system = reader.read_xyz_data()
-        li_atom = model.Atom("Li", model.Coordinates(0.0, 0.0, 0.0), 1.00, 6.997, 'kLi')
-        molecule = model.Molecule([li_atom], 'LI')
+        li_atom = model.Atom("Li", model.Coordinates(0.0, 0.0, 0.0), 1.00, 6.997, "kLi")
+        molecule = model.Molecule([li_atom], "LI")
 
         molecules = system.molecules
         self.assertEqual(molecules[0][0], molecule)
-        self.assertEqual(system.xyz_file_name, 'li-ec-01.xyz')
+        self.assertEqual(system.xyz_file_name, "li-ec/li-ec-01.xyz")
+
+    def test_xyz_tinker_reader(self):
+        reader = readingutils.InputReader(PACKMOL_TINKER_FILE_NAME, tinker_format=True)
+        reader.parse_packmol_input()
+
+        system = reader.read_xyz_data()
+        f_atom = model.Atom("F", model.Coordinates(1.714650, -1.415751, 0.421888), -0.13, 18.9984, "Ff")
+
+        molecule = system.molecules[0][0]
+        atoms = molecule.atoms
+        self.assertIn(f_atom, atoms)
+        self.assertEqual(system.xyz_file_name, "fsi-tinker/fsi-res.xyz")
+
+        bonds = molecule.bonds
+        self.assertIn((0, 3), bonds)
+        self.assertIn((5, 8), bonds)
+
+        angles = molecule.angles
+        self.assertIn((4, 5, 6), angles)
+        self.assertIn((1, 0, 4), angles)
+
+        dihedrals = molecule.dihedrals
+        self.assertIn((3, 0, 4, 5), dihedrals)
+        self.assertIn((1, 0, 4, 5), dihedrals)

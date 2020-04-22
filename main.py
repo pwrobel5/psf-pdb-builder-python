@@ -1,7 +1,6 @@
 import argparse
 
-import readingutils
-import savingutils
+from utils import readingutils, savingutils
 
 
 def main():

@@ -140,9 +140,17 @@ class Molecule:
     def angles(self):
         return self._angles
 
+    @angles.setter
+    def angles(self, angles):
+        self._angles = angles
+
     @property
     def dihedrals(self):
         return self._dihedrals
+
+    @dihedrals.setter
+    def dihedrals(self, dihedrals):
+        self._dihedrals = dihedrals
 
     def __eq__(self, other):
         if not isinstance(other, Molecule):

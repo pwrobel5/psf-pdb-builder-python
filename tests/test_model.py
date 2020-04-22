@@ -1,6 +1,7 @@
-import model
-import unittest
 import math
+import unittest
+
+from utils import model
 
 
 class TestModel(unittest.TestCase):
