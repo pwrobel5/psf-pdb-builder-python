@@ -5,7 +5,7 @@ from utils import model
 
 class InputReader:
     COORDINATE_LINE_COLUMNS = 4
-    COORDINATE_LINE_COLUMNS_TINKER = 6
+    COORDINATE_LINE_COLUMNS_TINKER = 5
     DRUDE_LINE_COLUMNS = 5
     BOND_SECTION_BEGINNING = "Bond Stretching Parameters"
     ANGLE_SECTION_BEGINNING = "Angle Bending Parameters"
@@ -117,7 +117,9 @@ class InputReader:
 
             molecule = model.Molecule(atoms)
             self.__read_dat_data(xyz_file_name.replace('.xyz', '.dat'), molecule)
-            self.__read_conn_data(xyz_file_name.replace('.xyz', '.conn'), molecule)
+
+            if molecule.atoms_number > 1:
+                self.__read_conn_data(xyz_file_name.replace('.xyz', '.conn'), molecule)
 
             molecules.append((molecule, molecule_count))
 
@@ -162,11 +164,13 @@ class InputReader:
         self.__jump_to_conn_section(conn_file, self.BOND_SECTION_BEGINNING, self.CONN_LINES_TO_OMIT)
         self.__read_bond_conn_data(conn_file, molecule)
 
-        self.__jump_to_conn_section(conn_file, self.ANGLE_SECTION_BEGINNING, self.CONN_LINES_TO_OMIT)
-        self.__read_angles_conn_data(conn_file, molecule)
+        if molecule.atoms_number > 2:
+            self.__jump_to_conn_section(conn_file, self.ANGLE_SECTION_BEGINNING, self.CONN_LINES_TO_OMIT)
+            self.__read_angles_conn_data(conn_file, molecule)
 
-        self.__jump_to_conn_section(conn_file, self.DIHEDRAL_SECTION_BEGINNING, self.CONN_LINES_TO_OMIT)
-        self.__read_dihedrals_conn_data(conn_file, molecule)
+        if molecule.atoms_number > 3:
+            self.__jump_to_conn_section(conn_file, self.DIHEDRAL_SECTION_BEGINNING, self.CONN_LINES_TO_OMIT)
+            self.__read_dihedrals_conn_data(conn_file, molecule)
 
         conn_file.close()
 

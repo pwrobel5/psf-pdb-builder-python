@@ -129,10 +129,10 @@ class Molecule:
     def __init__(self, atoms, residue_name="MOL"):
         self._atoms = atoms
         self._residue_name = residue_name
-        self._bonds = None
-        self._drude_bonds = None
-        self._angles = None
-        self._dihedrals = None
+        self._bonds = ()
+        self._drude_bonds = ()
+        self._angles = ()
+        self._dihedrals = ()
         self._shifts = {i: 0 for i in range(0, self.atoms_number)}
 
     @property
@@ -231,7 +231,7 @@ class Molecule:
         self._bonds = tuple(result)
 
     def determine_angles(self):
-        if self.bonds is None:
+        if len(self.bonds) == 0:
             return
 
         result = []
@@ -247,7 +247,7 @@ class Molecule:
         self._angles = tuple(result)
 
     def determine_dihedrals(self):
-        if self.angles is None:
+        if len(self.angles) == 0:
             return
 
         result = []
