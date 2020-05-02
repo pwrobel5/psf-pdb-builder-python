@@ -78,6 +78,8 @@ class PSFSaver(FileSaver):
         self._output_file.write(" ")
         items_in_line = 0
 
+        bond_counter = 0
+
         for (molecule, counter) in self._system.molecules:
             bond_list = bonds[molecule]
 
@@ -85,13 +87,13 @@ class PSFSaver(FileSaver):
                 for (first, second) in bond_list:
                     self._output_file.write("{:7d} {:7d} ".format(first + base, second + base))
                     items_in_line = (items_in_line + 1) % 4
+                    bond_counter += 1
 
-                    if items_in_line == 0:
+                    if items_in_line == 0 and bond_counter < bonds_number:
                         self._output_file.write('\n ')
                 base += molecule.atoms_number_with_drude
 
-        if items_in_line != 0:
-            self._output_file.write('\n')
+        self._output_file.write('\n')
 
     def __save_angles_section(self):
         angles = {}
@@ -107,6 +109,8 @@ class PSFSaver(FileSaver):
         self._output_file.write(" ")
         items_in_line = 0
 
+        angle_counter = 0
+
         for (molecule, counter) in self._system.molecules:
             angle_list = angles[molecule]
 
@@ -114,13 +118,13 @@ class PSFSaver(FileSaver):
                 for (first, middle, last) in angle_list:
                     self._output_file.write("{:7d} {:7d} {:7d} ".format(first + base, middle + base, last + base))
                     items_in_line = (items_in_line + 1) % 3
+                    angle_counter += 1
 
-                    if items_in_line == 0:
+                    if items_in_line == 0 and angle_counter < angles_number:
                         self._output_file.write('\n ')
                 base += molecule.atoms_number_with_drude
 
-        if items_in_line != 0:
-            self._output_file.write('\n')
+        self._output_file.write('\n')
 
     def __save_dihedrals_section(self):
         dihedrals = {}
@@ -152,7 +156,6 @@ class PSFSaver(FileSaver):
                         self._output_file.write('\n ')
                 base += molecule.atoms_number_with_drude
 
-        # if items_in_line != 0:
         self._output_file.write('\n')
 
     def __save_file_ending(self):
