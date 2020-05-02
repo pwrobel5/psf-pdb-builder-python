@@ -45,6 +45,7 @@ class Coordinates:
 
 class Atom:
     DRUDE_CHARGE_FACTOR = -0.0548768646057431
+    POLARIZABLE_CENTER_LAST_PARAMETER = 1.3
 
     def __init__(self, symbol, coordinates, charge=0.0, mass=0.0, namd_symbol=None):
         self._symbol = symbol
@@ -52,6 +53,8 @@ class Atom:
         self._charge = charge
         self._mass = mass
         self._drude_atom = None
+        self._polarizability = 0.0
+        self._last_parameter = 0.0
 
         if namd_symbol is None:
             self._namd_symbol = symbol
@@ -98,6 +101,14 @@ class Atom:
     def drude_atom(self, drude_atom):
         self._drude_atom = drude_atom
 
+    @property
+    def polarizability(self):
+        return self._polarizability
+
+    @property
+    def last_parameter(self):
+        return self._last_parameter
+
     def __eq__(self, other):
         if not isinstance(other, Atom):
             return NotImplemented
@@ -116,6 +127,8 @@ class Atom:
         self._mass -= mass
         self._charge -= drude_charge
         self._drude_atom = drude_atom
+        self._polarizability = -polarizability
+        self._last_parameter = self.POLARIZABLE_CENTER_LAST_PARAMETER
 
     def __hash__(self):
         return hash((self._symbol, self._coordinates, self._charge, self._mass, self._namd_symbol))

@@ -15,7 +15,7 @@ class FileSaver(metaclass=abc.ABCMeta):
 
 class PSFSaver(FileSaver):
     PSF_HEADER = "PSF CMAP\n\n       1 !NTITLE\n REMARKS written by psf-pdb-builder\n\n"
-    ATOM_LINE_FORMAT = "{:>8}    {:3} {:3d} {:3}  {:3}   {:3}  {:.6f}   {:.4f}  0\n"
+    ATOM_LINE_FORMAT = "{:>8}    {:3} {:3d} {:3}  {:3}   {:3}  {:.6f}   {:.4f}  0   {:.5f}       {:.5f}\n"
 
     def save_to_file(self):
         self._output_file.write(self.PSF_HEADER)
@@ -23,6 +23,7 @@ class PSFSaver(FileSaver):
         self.__save_bonds_section()
         self.__save_angles_section()
         self.__save_dihedrals_section()
+        self.__save_file_ending()
         self._output_file.close()
         print('PSF file successfully written')
 
@@ -42,7 +43,9 @@ class PSFSaver(FileSaver):
                                                                          atom.symbol,
                                                                          atom.namd_symbol,
                                                                          atom.charge,
-                                                                         atom.mass))
+                                                                         atom.mass,
+                                                                         atom.polarizability,
+                                                                         atom.last_parameter))
 
                     drude_atom = atom.drude_atom
                     if drude_atom is not None:
@@ -54,7 +57,9 @@ class PSFSaver(FileSaver):
                                                                              drude_atom.symbol,
                                                                              drude_atom.namd_symbol,
                                                                              drude_atom.charge,
-                                                                             drude_atom.mass))
+                                                                             drude_atom.mass,
+                                                                             drude_atom.polarizability,
+                                                                             drude_atom.last_parameter))
 
                     atom_number += 1
                 residue_id += 1
@@ -131,6 +136,8 @@ class PSFSaver(FileSaver):
         self._output_file.write(" ")
         items_in_line = 0
 
+        dihedral_counter = 0
+
         for (molecule, counter) in self._system.molecules:
             dihedral_list = dihedrals[molecule]
 
@@ -139,16 +146,29 @@ class PSFSaver(FileSaver):
                     self._output_file.write(
                         "{:7d} {:7d} {:7d} {:7d} ".format(first + base, second + base, third + base, fourth + base))
                     items_in_line = (items_in_line + 1) % 2
+                    dihedral_counter += 1
 
-                    if items_in_line == 0:
+                    if items_in_line == 0 and dihedral_counter < dihedrals_number:
                         self._output_file.write('\n ')
                 base += molecule.atoms_number_with_drude
 
-        if items_in_line != 0:
-            self._output_file.write('\n')
+        # if items_in_line != 0:
+        self._output_file.write('\n')
+
+    def __save_file_ending(self):
+        self._output_file.write("{:>8} !NIMPHI: impropers\n".format(0))
+        self._output_file.write("{:>8} !NDON: donors\n".format(0))
+        self._output_file.write("{:>8} !NACC: acceptors\n".format(0))
+        self._output_file.write("{:>8} !NNB\n".format(0))
+        self._output_file.write("{:>8} !NGRP\n".format(0))
+        self._output_file.write("{:>8}  {:>8} !NUMLP NUMLPH\n".format(0, 0))
+        self._output_file.write("{:>8} !NCRTERM: cross-terms\n".format(0))
+        self._output_file.write("{:>8} !NUMANISO\n".format(0))
+        self._output_file.write("END\n")
 
 
 class PDBSaver(FileSaver):
+    FIRST_LINE = "CRYST1    0.000    0.000    0.000  90.00  90.00  90.00 P 1           1\n"
     LINE_FORMAT = "ATOM {:6d}  {:3} {:3} {:5d}     {:7.3f} {:7.3f} {:7.3f} {:5.2f} {:5.2f}      {:4} {:3d}\n"
 
     def save_to_file(self):
@@ -164,6 +184,9 @@ class PDBSaver(FileSaver):
             print('[ERROR] Number of atoms calculated from Packmol input does not match number of atoms in .xyz file')
             xyz_file.close()
             return
+
+        # write header line in PDB
+        self._output_file.write(self.FIRST_LINE)
 
         # omit commentary line in .xyz
         xyz_file.readline()
