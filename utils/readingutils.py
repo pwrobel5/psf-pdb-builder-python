@@ -36,17 +36,18 @@ class InputReader:
         for line in input_file:
             line = line.split()
 
-            if line[0] == 'output':
-                self._packmol_output_name = dirname + line[1]
-            elif line[0] == 'structure':
-                xyz_name = dirname + line[1]
-                line = next(input_file).split()
-
-                while line[0] != 'end':
-                    if line[0] == 'number':
-                        self._xyz_data.append((xyz_name, int(line[1])))
-
+            if len(line) != 0:
+                if line[0] == 'output':
+                    self._packmol_output_name = dirname + line[1]
+                elif line[0] == 'structure':
+                    xyz_name = dirname + line[1]
                     line = next(input_file).split()
+
+                    while line[0] != 'end':
+                        if line[0] == 'number':
+                            self._xyz_data.append((xyz_name, int(line[1])))
+
+                        line = next(input_file).split()
 
         input_file.close()
 
