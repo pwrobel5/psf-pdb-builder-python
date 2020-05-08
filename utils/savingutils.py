@@ -14,8 +14,8 @@ class FileSaver(metaclass=abc.ABCMeta):
 
 
 class PSFSaver(FileSaver):
-    PSF_HEADER = "PSF CMAP\n\n       1 !NTITLE\n REMARKS written by psf-pdb-builder\n\n"
-    ATOM_LINE_FORMAT = "{:>8}    {:3} {:3d} {:3}  {:3}   {:3}  {:.6f}   {:.4f}  0   {:.5f}       {:.5f}\n"
+    PSF_HEADER = "PSF EXT CMAP CHEQ DRUDE\n\n1 !NTITLE\nREMARKS written by psf-pdb-builder\n"
+    ATOM_LINE_FORMAT = "{:>10}   {:3} {:8d} {:>11} {:>7}   {:3}   {:.10f} {:>9.4f}           0   {:.5f}       {:.5f}\n"
 
     def save_to_file(self):
         self._output_file.write(self.PSF_HEADER)
@@ -29,7 +29,7 @@ class PSFSaver(FileSaver):
 
     def __save_atoms_section(self):
         atom_number = 1
-        self._output_file.write("{:>8} !NATOM\n".format(self._system.atoms_number_with_drude))
+        self._output_file.write("{:>6}    !NATOM\n".format(self._system.atoms_number_with_drude))
 
         for (molecule, counter) in self._system.molecules:
             residue_id = 1
@@ -69,10 +69,10 @@ class PSFSaver(FileSaver):
         bonds_number = 0
 
         for (molecule, counter) in self._system.molecules:
-            bonds[molecule] = molecule.bonds + molecule.drude_bonds
+            bonds[molecule] = sorted(molecule.bonds + molecule.drude_bonds)
             bonds_number += counter * len(bonds[molecule])
 
-        self._output_file.write("{:>8} !NBOND: bonds\n".format(bonds_number))
+        self._output_file.write("{:>6}       !NBOND: bonds\n".format(bonds_number))
         base = 1
 
         self._output_file.write(" ")
@@ -85,7 +85,7 @@ class PSFSaver(FileSaver):
 
             for i in range(0, counter):
                 for (first, second) in bond_list:
-                    self._output_file.write("{:7d} {:7d} ".format(first + base, second + base))
+                    self._output_file.write("{:9d} {:9d} ".format(first + base, second + base))
                     items_in_line = (items_in_line + 1) % 4
                     bond_counter += 1
 
@@ -103,7 +103,7 @@ class PSFSaver(FileSaver):
             angles[molecule] = molecule.angles
             angles_number += counter * len(angles[molecule])
 
-        self._output_file.write("{:>8} !NTHETA: angles\n".format(angles_number))
+        self._output_file.write("{:>6}     !NTHETA: angles\n".format(angles_number))
         base = 1
 
         self._output_file.write(" ")
@@ -116,7 +116,7 @@ class PSFSaver(FileSaver):
 
             for i in range(0, counter):
                 for (first, middle, last) in angle_list:
-                    self._output_file.write("{:7d} {:7d} {:7d} ".format(first + base, middle + base, last + base))
+                    self._output_file.write("{:9d} {:9d} {:9d} ".format(first + base, middle + base, last + base))
                     items_in_line = (items_in_line + 1) % 3
                     angle_counter += 1
 
@@ -134,7 +134,7 @@ class PSFSaver(FileSaver):
             dihedrals[molecule] = molecule.dihedrals
             dihedrals_number += counter * len(dihedrals[molecule])
 
-        self._output_file.write("{:>8} !NPHI: dihedrals\n".format(dihedrals_number))
+        self._output_file.write("{:>6}    !NPHI: dihedrals\n".format(dihedrals_number))
         base = 1
 
         self._output_file.write(" ")
@@ -148,7 +148,7 @@ class PSFSaver(FileSaver):
             for i in range(0, counter):
                 for (first, second, third, fourth) in dihedral_list:
                     self._output_file.write(
-                        "{:7d} {:7d} {:7d} {:7d} ".format(first + base, second + base, third + base, fourth + base))
+                        "{:9d} {:9d} {:9d} {:9d} ".format(first + base, second + base, third + base, fourth + base))
                     items_in_line = (items_in_line + 1) % 2
                     dihedral_counter += 1
 
@@ -159,14 +159,14 @@ class PSFSaver(FileSaver):
         self._output_file.write('\n')
 
     def __save_file_ending(self):
-        self._output_file.write("{:>8} !NIMPHI: impropers\n".format(0))
-        self._output_file.write("{:>8} !NDON: donors\n".format(0))
-        self._output_file.write("{:>8} !NACC: acceptors\n".format(0))
-        self._output_file.write("{:>8} !NNB\n".format(0))
-        self._output_file.write("{:>8} !NGRP\n".format(0))
-        self._output_file.write("{:>8}  {:>8} !NUMLP NUMLPH\n".format(0, 0))
-        self._output_file.write("{:>8} !NCRTERM: cross-terms\n".format(0))
-        self._output_file.write("{:>8} !NUMANISO\n".format(0))
+        self._output_file.write("{} !NIMPHI: impropers\n".format(0))
+        self._output_file.write("{} !NDON: donors\n".format(0))
+        self._output_file.write("{} !NACC: acceptors\n".format(0))
+        self._output_file.write("{} !NNB\n".format(0))
+        self._output_file.write("{} !NGRP\n".format(0))
+        self._output_file.write("{}  {:>9} !NUMLP NUMLPH\n".format(0, 0))
+        self._output_file.write("{} !NCRTERM: cross-terms\n".format(0))
+        self._output_file.write("{} !NUMANISO\n".format(0))
         self._output_file.write("END\n")
 
 
