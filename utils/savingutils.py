@@ -172,7 +172,7 @@ class PSFSaver(FileSaver):
 
 class PDBSaver(FileSaver):
     FIRST_LINE = "CRYST1    0.000    0.000    0.000  90.00  90.00  90.00 P 1           1\n"
-    LINE_FORMAT = "ATOM {:6d}  {:3} {:3} {:5d}     {:7.3f} {:7.3f} {:7.3f} {:5.2f} {:5.2f}      {:4} {:3d}\n"
+    LINE_FORMAT = "ATOM {:6d}  {:3} {:>3} X {:3d}     {:7.3f} {:7.3f} {:7.3f} {:5.2f} {:5.2f}      {:4}\n"
 
     def save_to_file(self):
         xyz_file = open(self._system.xyz_file_name, 'r')
@@ -219,8 +219,7 @@ class PDBSaver(FileSaver):
                                                                     coordinates.z,
                                                                     occupancy,
                                                                     temperature_factor,
-                                                                    self._system.segment_id,
-                                                                    atom_number))
+                                                                    self._system.segment_id))
 
                     drude_atom = atom.drude_atom
                     if drude_atom is not None:
@@ -234,8 +233,7 @@ class PDBSaver(FileSaver):
                                                                         coordinates.z,
                                                                         occupancy,
                                                                         temperature_factor,
-                                                                        self._system.segment_id,
-                                                                        atom_number))
+                                                                        self._system.segment_id))
 
                     atom_number += 1
                 residue_id += 1
