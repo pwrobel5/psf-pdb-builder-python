@@ -64,7 +64,7 @@ class TestModel(unittest.TestCase):
         self.assertEqual(molecule1, molecule2)
         self.assertNotEqual(molecule2, molecule3)
 
-    def test_determine_bonds(self):
+    def __make_example_molecule(self):
         coordinatesH1 = model.Coordinates(0.0, 0.0, 0.95)
         coordinatesH2 = model.Coordinates(0.89567, 0.00, -0.316663)
         coordinatesO1 = model.Coordinates(0.0, 0.0, 0.0)
@@ -75,8 +75,39 @@ class TestModel(unittest.TestCase):
         atomO1 = model.Atom("O", coordinatesO1)
         atomO2 = model.Atom("O", coordinatesO2)
 
-        molecule = model.Molecule([atomH1, atomH2, atomO1, atomO2], "MOL")
+        return model.Molecule([atomH1, atomH2, atomO1, atomO2], "MOL")
+
+    def test_determine_bonds(self):
+        molecule = self.__make_example_molecule()
         molecule.determine_bonds(1.50)
         bonds = molecule.bonds
         expected_bonds = ((0, 2), (1, 2))
         self.assertEqual(bonds, expected_bonds)
+
+    def test_determine_angles(self):
+        molecule = self.__make_example_molecule()
+        molecule.determine_bonds(1.50)
+        molecule.determine_angles()
+        angles = molecule.angles
+        expected_angles = ((0, 2, 1),)
+        self.assertEqual(angles, expected_angles)
+
+    def test_determine_dihedrals(self):
+        coordinatesO1 = model.Coordinates(0.0, 0.0, 0.0)
+        coordinatesO2 = model.Coordinates(0.0, 0.0, 1.48)
+        coordinatesH1 = model.Coordinates(0.895669, 0.0, -0.316667)
+        coordinatesH2 = model.Coordinates(-0.895669, 0.0, 1.796667)
+
+        atomO1 = model.Atom("O", coordinatesO1)
+        atomO2 = model.Atom("O", coordinatesO2)
+        atomH1 = model.Atom("H", coordinatesH1)
+        atomH2 = model.Atom("H", coordinatesH2)
+
+        molecule = model.Molecule([atomO1, atomO2, atomH1, atomH2], "MOL")
+        molecule.determine_bonds(1.50)
+        molecule.determine_angles()
+        molecule.determine_dihedrals()
+
+        dihedrals = molecule.dihedrals
+        expected_dihedrals = ((2, 0, 1, 3),)
+        self.assertEqual(dihedrals, expected_dihedrals)
