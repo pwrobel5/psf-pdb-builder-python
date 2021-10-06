@@ -249,28 +249,38 @@ class Molecule:
 
         result = []
         for i in range(0, self.atoms_number):
-            filtered_bonds = filter(lambda x: i in x, self._bonds)
-            left_sides = filter(lambda x: x[1] == i, filtered_bonds)
-            right_sides = filter(lambda x: x[0] == i, filtered_bonds)
+            filtered_bonds = list(filter(lambda x: i in x, self._bonds))
 
-            for left in left_sides:
-                for right in right_sides:
-                    result.append(left + (right[1],))
+            for j in range (0, len(filtered_bonds)):
+                for k in range(j + 1, len(filtered_bonds)):
+                    first_bond = filtered_bonds[j]
+                    second_bond = filtered_bonds[k]
+
+                    left_index = first_bond[0] if first_bond[0] != i else first_bond[1]
+                    right_index = second_bond[0] if second_bond[0] != i else second_bond[1]
+
+                    result.append((left_index, i, right_index))
 
         self._angles = tuple(result)
 
     def determine_dihedrals(self):
-        if len(self.angles) == 0:
+        if len(self.bonds) == 0:
             return
 
         result = []
-        for i in range(0, self.atoms_number):
-            left_sides = list(filter(lambda x: x[2] == i, self._angles))
-            right_sides = list(filter(lambda x: x[0] == i, self._bonds))
+        for bond in self._bonds:
+            i = bond[0]
+            j = bond[1]
 
-            for left in left_sides:
-                for right in right_sides:
-                    result.append(left + (right[1],))
+            left_sides = list(filter(lambda x: i in x and j not in x, self._bonds))
+            right_sides = list(filter(lambda x: j in x and i not in x, self._bonds))
+
+            for left_side in left_sides:
+                for right_side in right_sides:
+                    left_index = left_side[0] if left_side[0] != i else left_side[1]
+                    right_index = right_side[0] if right_side[0] != j else right_side[1]
+
+                    result.append((left_index, i, j, right_index))
 
         self._dihedrals = tuple(result)
 
