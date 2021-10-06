@@ -129,6 +129,20 @@ For every residue declared in Packmol file a .xyz file containing list of atoms 
 * second line - for comments, skipped during parsing
 * every next line - atom symbol and its Cartesian coordinates
 
+When ```-t``` option was set on, the .xyz files are expected to be in Tinker format which differs a bit from that presented above, it does not contain a separate commentary line and also every atom line begins with atom index, example:
+```
+           9  molden generated tinker .xyz (mm3 param.)
+ 1  S     1.401416    0.159073   -0.087487     66  2  3  4  5
+ 2  F     1.714650   -1.415751    0.421888     64  1
+ 3  O     1.371717    0.926102    1.174689     61  1
+ 4  O     2.468252    0.411380   -1.076466     61  1
+ 5  N    -0.000023    0.000005   -0.909775     59  1  6
+ 6  S    -1.401385   -0.159093   -0.087474     66  5  7  8  9
+ 7  F    -1.715104    1.415771    0.421979     64  6
+ 8  O    -1.371117   -0.926126    1.174700     61  6
+ 9  O    -2.468382   -0.411342   -1.076298     61  6
+```
+
 # Tinker file (.conn)
 
 If ```-t``` option was set on, for every residue there should exist a .conn file (with the same name as the .xyz file for this residue) in
